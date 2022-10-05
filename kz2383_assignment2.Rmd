@@ -1,0 +1,156 @@
+---
+title: "kz2383_assignment2"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## problem 2 
+
+
+read and clean sheet mr_trash_wheel
+```{r}
+library(tidyverse)
+library(readxl)
+```
+```{r}
+ mr_trash_wheel = 
+  read_excel(
+    "~/Dropbox/Mac/Downloads/Trash Wheel Collection Data.xlsx",
+    sheet = "Mr. Trash Wheel", range = cell_cols("A:N")) %>%
+  janitor::clean_names() %>%
+  drop_na(dumpster)%>%
+  mutate(
+    sports_balls = round(sports_balls),
+    sports_balls = as.integer(sports_balls))%>%
+  mutate(dumpster=as.character(dumpster),
+         trash_wheel=c("mr"))
+  
+
+  
+```
+
+
+read and clean professor trash wheel data
+```{r}
+professor_trash_wheel = 
+  read_excel(
+    "~/Dropbox/Mac/Downloads/Trash Wheel Collection Data.xlsx",
+    sheet = "Professor Trash Wheel", range = cell_cols("A:M")) %>%
+  janitor::clean_names() %>%
+  drop_na(dumpster)%>%
+  mutate(
+         dumpster=as.character(dumpster),
+         year=as.character(year),
+          trash_wheel=c("prof"))
+
+
+
+
+```
+
+combine mr. trash wheel and professor trash wheel data
+
+```{r}
+data=mr_trash_wheel%>%full_join(professor_trash_wheel)
+
+
+#total weight in dataset professor trash wheel
+
+total_weight=sum(professor_trash_wheel$weight_tons)
+total_weight
+
+# total number of sports balls in 2020 in mr. trash wheel 
+num=mr_trash_wheel%>%filter(year=="2020")%>%pull(sports_balls)
+total_ball=sum(num)
+total_ball
+ 
+
+ 
+```
+ For Mr. Trash Wheel there are  `r nrow(mr_trash_wheel)` observations and `r ncol(mr_trash_wheel)` variables. Except for  `month` and `date`, all variables are  `integer` or `numeric` variables. Number of sports balls is rounded to nearest integer so is the only integer variable in the dataset.
+ 
+ As for professor trash wheel, there are `r nrow(professor_trash_wheel)` observations and `r ncol(professor_trash_wheel)` variables.Except for  `month` and `date`, all variables are  `integer` or `numeric` variables. Number of sports balls is rounded to nearest integer so is the only integer variable in the dataset.
+ 
+ ### There are a total of  tons of trash collected by professor trash wheel and  sports balls collected by mr. trash wheel in 2020. 
+ 
+ 
+ 
+ 
+## problem 3 
+
+
+clean pols-month dataset, separate variable mon and create new variable president
+
+```{r}
+pols = 
+  read_csv("/Users/zhankeming/Desktop/zhank/Desktop/data science/solution for data science/p8105_hw2_ajg2202/data/fivethirtyeight_datasets/pols-month.csv") %>%
+  separate(mon, into = c("year", "month", "day"), convert = TRUE) %>%
+  mutate(
+    month = month.name[month], 
+    president = recode(prez_gop, "0" = "dem", "1" = "gop", "2" = "gop")) %>%
+  select(-day, -starts_with("prez"))
+
+pols
+```
+
+ 
+clean dataset snp and arrange year and month as leading columns
+
+```{r}
+snp = 
+  read_csv("/Users/zhankeming/Desktop/zhank/Desktop/data science/solution for data science/p8105_hw2_ajg2202/data/fivethirtyeight_datasets/snp.csv") %>%
+  separate(date, into = c("month", "day", "year"), convert = TRUE) %>%
+  arrange(year, month) %>%
+  mutate(month = month.name[month]) %>%
+  select(year, month, close) 
+
+snp
+```
+transform unemployment data from wide to long format
+
+```{r}
+unemployment = 
+  read_csv("/Users/zhankeming/Desktop/zhank/Desktop/data science/solution for data science/p8105_hw2_ajg2202/data/fivethirtyeight_datasets/unemployment.csv") %>%
+  gather(key = month, value = unemployment, Jan:Dec) %>%
+  mutate(
+    month = 
+      recode(month, 
+             Jan = "January", Feb = "February",
+             Mar = "March", Apr = "April",
+             May = "May", Jun = "June",
+             Jul = "July", Aug = "August",
+             Sep = "September", Oct = "October",
+             Nov = "November", Dec = "December"))
+
+unemployment 
+```
+
+merge pols-month, snp and unemployment datasets
+
+```{r}
+data = 
+  left_join(pols, snp) %>%
+  left_join(., unemployment)
+
+data
+```
+
+
+The first dataset `pols` includes the number of national politicians who are democratic or republican at any given time.
+
+The second dataset `snp` indicates the stock market index (S&P), which usually represents the situation of stock market as a whole.
+ 
+The third dataset `unemployment` showed the percentage of unemployment in each month of the associated year.
+
+In the final merged dataset `data`,
+
+* there are `r nrow(data)` rows and `r ncol(data)` columns;
+* it range from year `r min(as.numeric(pull(data,year)))` to year `r max(as.numeric(pull(data,year)))`;
+* it have key variables named "`r names(data)[-c(1:2)]`".
+
+
+
+
