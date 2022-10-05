@@ -89,8 +89,8 @@ variables.Except for `month` and `date`, all variables are `integer` or
 `numeric` variables. Number of sports balls is rounded to nearest
 integer so is the only integer variable in the dataset.
 
-\#\#\# There are a total of tons of trash collected by professor trash
-wheel and sports balls collected by mr. trash wheel in 2020.
+\#\#\# There are a total of 190.12 tons of trash collected by professor trash
+wheel and 856 sports balls collected by mr. trash wheel in 2020.
 
 ## problem 3
 
